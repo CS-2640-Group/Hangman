@@ -10,19 +10,34 @@
 # 4/18/2025
 # CS 2610.02
 .include "Bitmap_Macros.asm"
+.include "Strings.asm"
 
 .data
 # strings in MARS are just an array of characters
 # even though this looks like one string, we will be able to access it character by character 
 alphabet: .asciiz "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-underscore: .asciiz "_"
+underscore: .asciiz "_ "
 
 .text
-# CODE LATER: Player 1 enters a word
+main:
+	.eqv numUnderscores $t0
+	.eqv loopCounter $t1
+	
+	# CODE LATER: Player 1 enters a word
+	
+	#hard coding 3 as the number of underscores until we have code to get player 1's input and count the characters
+	addi numUnderscores, numUnderscores, 3 
 
-# CODE LATER: Loop to print 1 underscore per 1 letter in Player 1's word
+#CODE LATER: print 1 underscore per 1 letter in Player 1's word
+#Code below prints underscores for our hard-coded word 
+printUnderscoresLoop: 
+	printLabel(underscore)
+	addi loopCounter, loopCounter, 1 # increment loopCounter by 1
+	blt loopCounter, numUnderscores, printUnderscoresLoop # if loopCounter < numUnderscores, repeat loop
+	
+getGuess:
+	readChar($t2)
 
-# CODE NOW: Print underscores for our hard-coded word
 
 # Get Player 2's one letter guess
 #	- if they type 1 instead of a letter, jump to the code for guessing a word
