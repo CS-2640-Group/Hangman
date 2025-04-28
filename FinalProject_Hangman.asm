@@ -17,14 +17,23 @@
 # even though this looks like one string, we will be able to access it character by character 
 alphabet: .asciiz "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 underscore: .asciiz "_ "
+enterWord: .asciiz "Player 1, please enter a word for Player 2 to guess: "
+enterChar: .asciiz "\nPlayer 2, enter your next character guess: "
+strBuffer: .space 200 #buffer to hold Player 1's word
 
 .text
 main:
 	.eqv numUnderscores $t0
 	.eqv loopCounter $t1
 	
-	# CODE LATER: Player 1 enters a word
+	printLabel(enterWord) #ask Player 1 to enter a word
+	readString(strBuffer, 201) #get Player 1's word
 	
+#loop through each character within Player 1's word
+wordLoop:
+	
+
+printUnderscores:
 	#hard coding 3 as the number of underscores until we have code to get player 1's input and count the characters
 	addi numUnderscores, numUnderscores, 3 
 
@@ -36,7 +45,9 @@ printUnderscoresLoop:
 	blt loopCounter, numUnderscores, printUnderscoresLoop # if loopCounter < numUnderscores, repeat loop
 	
 getGuess:
-	readChar($t2)
+	printLabel(enterChar) #prompt Player 2 to guess a character 
+	readChar($t2) #get char from user, save to $t2
+	
 
 
 # Get Player 2's one letter guess
