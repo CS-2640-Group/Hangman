@@ -24,30 +24,40 @@ alphabet: .asciiz "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 underscore: .asciiz "_ "
 enterWord: .asciiz "Player 1, please enter a word for Player 2 to guess: "
 enterChar: .asciiz "\nPlayer 2, enter your next character guess: "
-strBuffer: .space 200 #buffer to hold Player 1's word
+wordBuffer: .space 200 #buffer to hold Player 1's word
 
 .text
 main:
-	.eqv numUnderscores $t0
 	.eqv loopCounter $t1
+	.eqv wordCounter $t2 #number of characters in Player 1's word
+	.eqv wordBufferAdd $t3 #address for the wordBuffer
+	.eqv currByte $t4 #current byte
+	
 	
 	printLabel(enterWord) #ask Player 1 to enter a word
-	readString(strBuffer, 201) #get Player 1's word
+	readString(wordBuffer, 201) #get Player 1's word
 	
-#loop through each character within Player 1's word
+	la wordBufferAdd, wordBuffer #store wordBuffer address in wordBufferAdd
+	move wordCounter, $zero #set wordCounter to 0
+	move loopCounter, $zero #set loopCounter to 0 
+	
+#loop through each character within Player 1's word, increment counter 
 wordLoop:
+	lb currByte, 0(wordBufferAdd) #load the current byte at wordBufferAdd into currByte
+	beqz currByte, printUnderscores #if current byte is 0 (we've hit the null terminator), exit loop
 	
+	addi wordBufferAdd,wordBufferAdd, 1 #increment wordBufferAdd by 1
+	addi wordCounter, wordCounter, 1 #increment wordCounter by 1
+	j wordLoop #repeat loop
 
 printUnderscores:
-	#hard coding 3 as the number of underscores until we have code to get player 1's input and count the characters
-	addi numUnderscores, numUnderscores, 3 
+	subi wordCounter, wordCounter, 1 #subtract 1 from wordCounter because it's counted one too many times
 
-#CODE LATER: print 1 underscore per 1 letter in Player 1's word
-#Code below prints underscores for our hard-coded word 
+#print 1 underscore per 1 letter in Player 1's word
 printUnderscoresLoop: 
 	printLabel(underscore)
 	addi loopCounter, loopCounter, 1 # increment loopCounter by 1
-	blt loopCounter, numUnderscores, printUnderscoresLoop # if loopCounter < numUnderscores, repeat loop
+	blt loopCounter, wordCounter, printUnderscoresLoop # if loopCounter < number of chars in Player 1's word, repeat loop
 	
 getGuess:
 	printLabel(enterChar) #prompt Player 2 to guess a character 
