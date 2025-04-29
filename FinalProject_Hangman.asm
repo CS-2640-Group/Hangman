@@ -23,9 +23,14 @@
 alphabet: .asciiz "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 underscore: .asciiz "_ "
 enterWord: .asciiz "Player 1, please enter a word for Player 2 to guess: "
-enterChar: .asciiz "\nPlayer 2, enter your next character guess or type 1 to guess a word: "
-enterWord: .asciiz "\nPlayer 2, enter your word guess: "
+enterCharGuess: .asciiz "\nPlayer 2, enter your next character guess or type 1 to guess a word: "
+enterWordGuess: .asciiz "\nPlayer 2, enter your word guess: "
 wordBuffer: .space 200 #buffer to hold Player 1's word
+wordGuessBuffer: .space 200 #buffer to hold Player 2's word guess
+correctGuess: .asciiz "\nCorrect guess" #used for branch testing - DELETE LATER
+incorrectGuess: .asciiz "\nIncorrect guess" #used for branch testing - DELETE LATER
+aMsg: .asciiz "A" #used as a filler - DELETE LATER
+newline: .asciiz "\n"
 
 .text
 main:
@@ -34,6 +39,7 @@ main:
 	.eqv wordBufferAdd $t3 #address for the wordBuffer
 	.eqv currByte $t4 #current byte
 	.eqv currChar $t5 #Player 2's current 1-character guess 
+	.eqv limbCounter $t6 #count limbs on Hangman to determine if Player 2 has lost or can continue to guess 
 	.eqv one $s0 #will store the ASCII value of one
 	
 	
@@ -51,7 +57,7 @@ wordLoop:
 	lb currByte, 0(wordBufferAdd) #load the current byte at wordBufferAdd into currByte
 	beqz currByte, printUnderscores #if current byte is 0 (we've hit the null terminator), exit loop
 	
-	addi wordBufferAdd,wordBufferAdd, 1 #increment wordBufferAdd by 1
+	addi wordBufferAdd, wordBufferAdd, 1 #increment wordBufferAdd by 1
 	addi wordCounter, wordCounter, 1 #increment wordCounter by 1
 	j wordLoop #repeat loop
 
@@ -66,19 +72,18 @@ printUnderscoresLoop:
 	blt loopCounter, wordCounter, printUnderscoresLoop # if loopCounter < number of chars in Player 1's word, repeat loop
 
 # Get Player 2's one letter guess
-#	- if they type 1 instead of a letter, jump to the code for guessing a word
-#	- if they guess a correct letter, replace appropriate underscore(s) with that letter
-#	- if they guess an incorrect letter, add limb to the hangman bitmap 	
+#	- if they type 1, jump to getWordGuess (the code for guessing a word)
+#	- if they guess a correct letter, jump to correctCharGuess to replace appropriate underscore(s) with that letter
+#	- if they guess an incorrect letter, jump to incorrectCharGuess to add a limb to the Hangman bitmap and increment limb counter	
 getCharGuess:
-	printLabel(enterChar) #prompt Player 2 to guess a character 
+	printLabel(enterCharGuess) #prompt Player 2 to guess a character 
 	readChar(currChar) #save char from user to currChar
 	
 	li one, 49 #load ASCII code for '1' into one
 	beq currChar, one, getWordGuess #if the currChar is 1, jump to getWordGuess
 	
-	
-	#CODE NEXT: conditions to exit getCharGuess
-	#	- hangman has been fully drawn
+	#CODE SOON: conditions to exit getCharGuess:
+	#	- hangman has been fully drawn (use limb counter from wrongCharGuess to keep track)
 	#	- every invidual character of Player 1's word has been guessed
 	
 	la wordBufferAdd, wordBuffer #store wordBuffer address in wordBufferAdd
@@ -92,19 +97,44 @@ getCharGuess:
 		
 		beq currByte, currChar, correctCharGuess #if the current char in Player 2's word matches currChar, branch to correctCharGuess
 		
-		addi wordBufferAdd,wordBufferAdd, 1 #increment wordBufferAdd by 1
+		addi wordBufferAdd, wordBufferAdd, 1 #increment wordBufferAdd by 1
 		j wordLoop2 #repeat loop
 		
 #For when Player 2 guesses a correct character 
 #	- Replace appropriate underscore(s) with the character
-#	- No need to add any limbs to Hangman 
-#	- Reminder: for words with repeated letters (e.g. two "l"s in "hello"), must replace all appropriate underscores with the guessed character
+#		- Reminder: for words with repeated letters (e.g. two "l"s in "hello"), must replace all appropriate underscores with the guessed character.
+#		  We should loop through the entire word again, comparing it against our guess to acomplish this 
 correctCharGuess:
+	printLabel(newline)
+	la wordBufferAdd, wordBuffer #store wordBuffer address in wordBufferAdd
+	
+	wordLoop3:
+		lb currByte, 0(wordBufferAdd) #load the current byte at wordBufferAdd into currByte
+		beqz currByte, exit #if currByte is 0 (null), exit
+		
+		addi wordBufferAdd, wordBufferAdd, 1 #increment wordBufferAdd by 1
+		
+		bne currByte, currChar, printUnderscore #if currByte of Player 1's word /= Player 2's currChar guess, print underscore
+		beq currByte, currChar, printCurrChar #if currByte of Player 1's word == Player 2's currChar guess, print the character
+	
+	#FIX: this currently prints one too many underscores at the end of the word - idk why 
+	printUnderscore:
+		printLabel(underscore)
+		j wordLoop3
+	
+	printCurrChar:
+		#printAddress(currByte) #code broken idk
+		printLabel(aMsg) #prints "A" as a filler for testing until I fix the above line 
+		j wordLoop3
+		
 
 #For when Player 2 guesses an incorrect character
-#	- No need to replace any underscores with a letter
 #	- Add one limb to hangman 
-wrongCharGuess:
+#	- Increment limb counter
+incorrectCharGuess:
+	#code below is being used for branch testing - DELETE LATER
+	printLabel(incorrectGuess)
+	j exit
 	
 	
 
@@ -112,9 +142,10 @@ wrongCharGuess:
 #	- triggered when Player 2 types "1" for the next guess prompt 
 #	- verify that they entered a word of the correct length, print an error message and prompt them again if they didn't 
 #	- if they guess a correct word, print you win and exit
-#	- if they guess an incorrect word, return to prompting them for single letter guesses 
+#	- if they guess an incorrect word, add limb, increment limb counter, and return to prompting them for single letter guesses 
 getWordGuess:
-	printLabel(enterWord) #prompt Player 2 for their word guess
+	printLabel(enterWordGuess) #prompt Player 2 for their word guess
+	readString(wordGuessBuffer, 201) #get Player 2's word guess of maximum 200 chars and save it to wordGuessBuffer
 
 
 # To use the Bitmap Display Tool:
