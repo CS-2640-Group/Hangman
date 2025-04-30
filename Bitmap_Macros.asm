@@ -16,7 +16,7 @@ frameBuffer:	.space	0x100000		# 256 pixels  x 256 pixels = 65536 pixels
 	li $t1, %x				# column index (x) for horizontal position
 	li $t2, %y				# row for vertical position (y) of horizontal line
 	li $t3, %color			# load color of choice into $t3
-	li $t6, %length		# number of columns for line
+	li $t8, %length		# number of columns for line
 	
 	horizLoop:
 		# To calculate the position for each pixel, the address of the pixel gets calculated
@@ -28,7 +28,7 @@ frameBuffer:	.space	0x100000		# 256 pixels  x 256 pixels = 65536 pixels
 		sw $t3, 0($t5)		# store color into pixel to display on bitmap
 	
 		addi $t1, $t1, 1		# move to next column
-		blt $t1, $t6, horizLoop	# loop to draw next pixel
+		blt $t1, $t8, horizLoop	# loop to draw next pixel
 .end_macro
 
 # To modify vert. lines in drawVert(x, y, length, color):
@@ -40,7 +40,7 @@ frameBuffer:	.space	0x100000		# 256 pixels  x 256 pixels = 65536 pixels
 	li $t1, %x				# column index (x) for horizontal position
 	li $t2, %y				# row for vertical position (y) of horizontal line
 	li $t3, %color			# load color of choice into $t3
-	li $t6, %length		# number of columns for line
+	li $t8, %length		# number of columns for line
 	
 	vertLoop:
 		#  address = base address + ((row * width) + column) * 4 bytes
@@ -51,7 +51,7 @@ frameBuffer:	.space	0x100000		# 256 pixels  x 256 pixels = 65536 pixels
 		sw $t3, 0($t5)			# store color into pixel to display on bitmap
 	
 		addi $t2, $t2, 1		# move down to next row
-		blt $t2, $t6, vertLoop	# loop to draw next pixel
+		blt $t2, $t8, vertLoop	# loop to draw next pixel
 .end_macro
 
 .macro drawDiagBackLine(%x, %y, %length, %color)
@@ -59,7 +59,7 @@ frameBuffer:	.space	0x100000		# 256 pixels  x 256 pixels = 65536 pixels
 	li $t1, %x				# column index (x) for horizontal position
 	li $t2, %y				# row for vertical position (y) of horizontal line
 	li $t3, %color			# load color of choice into $t3
-	li $t6, %length		# number of columns for line
+	li $t8, %length		# number of columns for line
 	
 	backLoop:
 		#  address = base address + ((row * width) + column) * 4 bytes
@@ -71,7 +71,7 @@ frameBuffer:	.space	0x100000		# 256 pixels  x 256 pixels = 65536 pixels
 		
 		addi $t1, $t1, 1		# move to next column
 		addi $t2, $t2, 1	# move down to next row
-		blt $t2, $t6, backLoop
+		blt $t2, $t8, backLoop
 .end_macro
 
 .macro drawDiagFrontLine(%x, %y, %length, %color)
@@ -79,7 +79,7 @@ frameBuffer:	.space	0x100000		# 256 pixels  x 256 pixels = 65536 pixels
 	li $t1, %x				# column index (x) for horizontal position
 	li $t2, %y				# row for vertical position (y) of horizontal line
 	li $t3, %color			# load color of choice into $t3
-	li $t6, %length		# number of columns for line
+	li $t8, %length		# number of columns for line
 	
 	backLoop:
 		#  address = base address + ((row * width) + column) * 4 bytes
@@ -91,7 +91,7 @@ frameBuffer:	.space	0x100000		# 256 pixels  x 256 pixels = 65536 pixels
 		
 		addi $t1, $t1, 1		# move to next column
 		sub $t2, $t2, 1		# move up to next row
-		blt $t1, $t6, backLoop
+		blt $t1, $t8, backLoop
 .end_macro	
 	
 	
