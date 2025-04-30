@@ -46,20 +46,26 @@ main:
 	printLabel(enterWord) #ask Player 1 to enter a word
 	readString(wordBuffer, 201) #get Player 1's word
 	
-	#CODE LATER if there's extra time: convert Player 1's word plus Player 2's char and word guesses to uppercase so that word casing doesn't matter
+	
 	
 	la wordBufferAdd, wordBuffer #store wordBuffer address in wordBufferAdd
+	
+	#CODE LATER if there's extra time: convert Player 1's word plus Player 2's char and word guesses to uppercase so that word casing doesn't matter
+	toUpperCase(wordBufferAdd)
+	
 	move wordCounter, $zero #set wordCounter to 0
 	move loopCounter, $zero #set loopCounter to 0 
 	
 #count the number of characters in Player 1's word 
-wordLoop:
-	lb currByte, 0(wordBufferAdd) #load the current byte at wordBufferAdd into currByte
-	beqz currByte, printUnderscores #if current byte is 0 (we've hit the null terminator), exit loop
-	
-	addi wordBufferAdd, wordBufferAdd, 1 #increment wordBufferAdd by 1
-	addi wordCounter, wordCounter, 1 #increment wordCounter by 1
-	j wordLoop #repeat loop
+## -- Using stringGetLength instead
+stringGetLength(wordBufferAdd, wordCounter)
+#wordLoop:
+#	lb currByte, 0(wordBufferAdd) #load the current byte at wordBufferAdd into currByte
+#	beqz currByte, printUnderscores #if current byte is 0 (we've hit the null terminator), exit loop
+#	
+#	addi wordBufferAdd, wordBufferAdd, 1 #increment wordBufferAdd by 1
+#	addi wordCounter, wordCounter, 1 #increment wordCounter by 1
+#	j wordLoop #repeat loop
 
 #preparation to use the printUnderscoresLoop to print underscores
 printUnderscores:
@@ -78,6 +84,9 @@ printUnderscoresLoop:
 getCharGuess:
 	printLabel(enterCharGuess) #prompt Player 2 to guess a character 
 	readChar(currChar) #save char from user to currChar
+	
+	# Uppercase the char
+	toUpperCaseByte(currChar)
 	
 	li one, 49 #load ASCII code for '1' into one
 	beq currChar, one, getWordGuess #if the currChar is 1, jump to getWordGuess
@@ -110,7 +119,7 @@ correctCharGuess:
 	
 	wordLoop3:
 		lb currByte, 0(wordBufferAdd) #load the current byte at wordBufferAdd into currByte
-		beqz currByte, exit #if currByte is 0 (null), exit
+		beqz currByte, reprompt #if currByte is 0 (null), reprompt
 		
 		addi wordBufferAdd, wordBufferAdd, 1 #increment wordBufferAdd by 1
 		
@@ -126,6 +135,10 @@ correctCharGuess:
 		#printAddress(currByte) #code broken idk
 		printLabel(aMsg) #prints "A" as a filler for testing until I fix the above line 
 		j wordLoop3
+	
+	reprompt:
+	# Reprompt for guess
+	j getCharGuess
 		
 
 #For when Player 2 guesses an incorrect character
@@ -134,7 +147,20 @@ correctCharGuess:
 incorrectCharGuess:
 	#code below is being used for branch testing - DELETE LATER
 	printLabel(incorrectGuess)
-	j exit
+	#j exit
+	
+	# Add to Limb Counter
+	addi limbCounter, limbCounter, 1
+	
+	printLiteral("\nLimb Count: ")
+	printInt(limbCounter)
+	
+	# Check if the limb counter is equal to 6
+	# If so, end game
+	beq limbCounter, 6, exit # Exit is temporary, later write a game over screen or something
+	
+	# Else, add to limbCounter and reprompt for new guess
+	j getCharGuess
 	
 	
 
