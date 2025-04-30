@@ -117,17 +117,9 @@ correctCharGuess:
 	printLabel(newline)
 	la wordBufferAdd, wordBuffer #store wordBuffer address in wordBufferAdd
 	
-	wordLoop3:
-		lb currByte, 0(wordBufferAdd) #load the current byte at wordBufferAdd into currByte
-		beqz currByte, reprompt #if currByte is 0 (null), reprompt
-		
-		addi wordBufferAdd, wordBufferAdd, 1 #increment wordBufferAdd by 1
-		
-		beq currByte, 10, exit # if new line char, exit program ( program prints extra underscore without this) 
-		bne currByte, currChar, printUnderscore #if currByte of Player 1's word /= Player 2's currChar guess, print underscore
-		beq currByte, currChar, printCurrChar #if currByte of Player 1's word == Player 2's currChar guess, print the character
+	# Jump to the loop to avoid printing underscores or characters early
+	j wordLoop3
 	
-	#FIX: this currently prints one too many underscores at the end of the word - idk why 
 	printUnderscore:
 		printLabel(underscore)
 		j wordLoop3
@@ -138,6 +130,22 @@ correctCharGuess:
 		# printAddress(currByte) #code broken idk
 		# printLabel(aMsg) #prints "A" as a filler for testing until I fix the above line 
 		j wordLoop3
+	
+	wordLoop3:
+		lb currByte, 0(wordBufferAdd) #load the current byte at wordBufferAdd into currByte
+		beqz currByte, reprompt #if currByte is 0 (null), reprompt
+		
+		addi wordBufferAdd, wordBufferAdd, 1 #increment wordBufferAdd by 1
+		
+		# Since this loop runs through the characters in the string instead of a counter, it checks
+		# The null terminator / new line character as well, adding an extra underscore
+		# Exit the loop when the null terminator / new line character is found
+		beq currByte, $0, reprompt
+		beq currByte, 10, reprompt # 10 is the ascii value for \n
+		
+		bne currByte, currChar, printUnderscore #if currByte of Player 1's word /= Player 2's currChar guess, print underscore
+		beq currByte, currChar, printCurrChar #if currByte of Player 1's word == Player 2's currChar guess, print the character
+	
 	
 	reprompt:
 	# Reprompt for guess
