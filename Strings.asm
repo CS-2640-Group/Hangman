@@ -53,6 +53,14 @@
 	syscall
 .end_macro
 
+# Prints a blank space
+# Used Registers: $v0, $a0
+.macro printSpace
+	li $v0, 11
+	li $a0, 32
+	syscall
+.end_macro
+
 # Takes a string input from the user
 # When user presses the enter key, a newline character is inserted
 # Params:
