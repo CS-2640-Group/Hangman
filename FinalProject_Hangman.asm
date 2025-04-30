@@ -71,11 +71,42 @@ stringGetLength(wordBufferAdd, wordCounter)
 printUnderscores:
 	subi wordCounter, wordCounter, 1 #subtract 1 from wordCounter because it's counted one too many times
 
+# Copy word count to wordGuessBuffer
+# And replace each letter with underscores
+fillWordGuessBuffer:
+	# Get the address of the buffer
+	la $s1, wordGuessBuffer
+	# Get the byte of underscore
+	lb $s2, underscore
+	# Copy address of wordBufferAdd
+	la $s3, wordBuffer
+	
+	loop:
+		# Get the character from the set word
+		lb $t7, 0($s3)
+	
+		# If the character is null terminator / new line then return
+		beq $t7, $0, return
+		beq $t7, 10, return # 10 is the ascii value for \n
+		# Else store an underscore byte into the wordGuessBuffer
+		sb $s2, 0($s1)
+	
+		# Increment and loop
+		addi $s3, $s3, 1 # Next character in wordBuffer
+		addi $s1, $s1, 1 # Next character in wordGuessBuffer
+	
+		j loop
+	
+	return:
+	# Print the wordGuessBuffer
+	la $s1, wordGuessBuffer
+	printSpacedString($s1)
+
 #print 1 underscore per 1 char in Player 1's word
-printUnderscoresLoop: 
-	printLabel(underscore)
-	addi loopCounter, loopCounter, 1 # increment loopCounter by 1
-	blt loopCounter, wordCounter, printUnderscoresLoop # if loopCounter < number of chars in Player 1's word, repeat loop
+#printUnderscoresLoop: 
+#	printLabel(underscore)
+#	addi loopCounter, loopCounter, 1 # increment loopCounter by 1
+#	blt loopCounter, wordCounter, printUnderscoresLoop # if loopCounter < number of chars in Player 1's word, repeat loop
 
 # Get Player 2's one letter guess
 #	- if they type 1, jump to getWordGuess (the code for guessing a word)
@@ -115,21 +146,19 @@ getCharGuess:
 #		  We should loop through the entire word again, comparing it against our guess to acomplish this 
 correctCharGuess:
 	printLabel(newline)
-	la wordBufferAdd, wordBuffer #store wordBuffer address in wordBufferAdd
+	la wordBufferAdd, wordBuffer # Store wordBuffer address in wordBufferAdd
+	la $s1, wordGuessBuffer # Save the address of wordGuessBuffer
 	
-	# Jump to the loop to avoid printing underscores or characters early
-	j wordLoop3
+	#printUnderscore:
+	#	printLabel(underscore)
+	#	j wordLoop3
 	
-	printUnderscore:
-		printLabel(underscore)
-		j wordLoop3
-	
-	printCurrChar:
-		printChar(currChar) # This works better im pretty sure
-		printSpace # print space for formatting
-		# printAddress(currByte) #code broken idk
-		# printLabel(aMsg) #prints "A" as a filler for testing until I fix the above line 
-		j wordLoop3
+	#printCurrChar:
+	#	printChar(currChar) # This works better im pretty sure
+	#	printSpace # print space for formatting
+	#	# printAddress(currByte) #code broken idk
+	#	# printLabel(aMsg) #prints "A" as a filler for testing until I fix the above line 
+	#	j wordLoop3
 	
 	wordLoop3:
 		lb currByte, 0(wordBufferAdd) #load the current byte at wordBufferAdd into currByte
@@ -137,19 +166,46 @@ correctCharGuess:
 		
 		addi wordBufferAdd, wordBufferAdd, 1 #increment wordBufferAdd by 1
 		
+		
 		# Since this loop runs through the characters in the string instead of a counter, it checks
-		# The null terminator / new line character as well, adding an extra underscore
+		# The null terminator / new line character as well
 		# Exit the loop when the null terminator / new line character is found
 		beq currByte, $0, reprompt
 		beq currByte, 10, reprompt # 10 is the ascii value for \n
 		
-		bne currByte, currChar, printUnderscore #if currByte of Player 1's word /= Player 2's currChar guess, print underscore
-		beq currByte, currChar, printCurrChar #if currByte of Player 1's word == Player 2's currChar guess, print the character
+		#bne currByte, currChar, printUnderscore #if currByte of Player 1's word /= Player 2's currChar guess, print underscore
+		
+		# Instead of printing either an underscore or the character,
+		# Replace the corrosponding underscore in wordGuessBuffer with the new character
+		
+		# If the characters are the same, replace the character at the same position in wordGuessBuffer
+		beq currByte, currChar, saveChar #if currByte of Player 1's word == Player 2's currChar guess, save the character
+		
+		addi $s1, $s1, 1 # increment wordGuessBuffer
+		j wordLoop3 # Continue looping through until the end of string
 	
+	saveChar:
+		sb currChar, 0($s1)
+		addi $s1, $s1, 1 # increment wordGuessBuffer
+		j wordLoop3
 	
 	reprompt:
-	# Reprompt for guess
-	j getCharGuess
+		# Print the resulting string
+		la $s1, wordGuessBuffer
+		printSpacedString($s1)
+	
+		# Save the underscore
+		lb $s2, underscore
+	
+		# Check if the word has been guessed
+		stringContains($s1, $s2, $s3)
+	
+		beq $s3, 0, exit # Exit if the word has no underscores
+	
+		# Else do nothing and continue
+	
+		# Reprompt for guess
+		j getCharGuess
 		
 
 #For when Player 2 guesses an incorrect character
@@ -163,6 +219,7 @@ incorrectCharGuess:
 	# Add to Limb Counter
 	addi limbCounter, limbCounter, 1
 	
+	# Print Limb Counter
 	printLiteral("\nLimb Count: ")
 	printInt(limbCounter)
 	
@@ -171,6 +228,18 @@ incorrectCharGuess:
 	beq limbCounter, 6, exit # Exit is temporary, later write a game over screen or something
 	
 	# Else, add to limbCounter and reprompt for new guess
+	# Print current guessing string
+	printLiteral("\n")
+	la $s1, wordGuessBuffer
+	printSpacedString($s1)
+	
+	
+	###################################################
+	# Draw Limb code in Bitmap Display somewhere here #
+	###################################################
+	
+	
+	# Reprompt
 	j getCharGuess
 	
 	

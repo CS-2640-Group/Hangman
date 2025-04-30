@@ -61,6 +61,36 @@
 	syscall
 .end_macro
 
+.macro printSpacedString(%stringAddress)
+	# Save string address
+	move $t0, %stringAddress
+	
+	# For each character, print the character then print a space
+	
+	# Print first character
+	lb $t1, 0($t0)
+	printChar($t1)
+	# Increment to next character
+	addi $t0, $t0, 1
+	loop:
+		# Load next character
+		lb $t1, 0($t0)
+		# If character is null terminator / new line then return
+		beq $t1, $0, return
+		beq $t1, 10, return # 10 is the ascii value for \n
+		
+		# Else print a space then the character
+		printSpace
+		printChar($t1)
+		
+		# Increment and loop
+		addi $t0, $t0, 1
+		j loop
+	
+	return:
+		
+.end_macro
+
 # Takes a string input from the user
 # When user presses the enter key, a newline character is inserted
 # Params:
