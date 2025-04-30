@@ -123,6 +123,7 @@ correctCharGuess:
 		
 		addi wordBufferAdd, wordBufferAdd, 1 #increment wordBufferAdd by 1
 		
+		beq currByte, 10, exit # if new line char, exit program ( program prints extra underscore without this) 
 		bne currByte, currChar, printUnderscore #if currByte of Player 1's word /= Player 2's currChar guess, print underscore
 		beq currByte, currChar, printCurrChar #if currByte of Player 1's word == Player 2's currChar guess, print the character
 	
@@ -132,8 +133,10 @@ correctCharGuess:
 		j wordLoop3
 	
 	printCurrChar:
-		#printAddress(currByte) #code broken idk
-		printLabel(aMsg) #prints "A" as a filler for testing until I fix the above line 
+		printChar(currChar) # This works better im pretty sure
+		printSpace # print space for formatting
+		# printAddress(currByte) #code broken idk
+		# printLabel(aMsg) #prints "A" as a filler for testing until I fix the above line 
 		j wordLoop3
 	
 	reprompt:
