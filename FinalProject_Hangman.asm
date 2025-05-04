@@ -234,16 +234,13 @@ incorrectCharGuess:
 	# Add appropriate limb drawing based on limb counter
 	beq limbCounter, 1, drawHead
 	beq limbCounter 2, drawBody
-	beq limbCounter 3, drawRightArm
-	beq limbCounter 4, drawLeftArm
-	beq limbCounter 5, drawLeftLeg
-	beq limbCounter 6, drawRightLeg	# at 6 limbs, game is over
-	
-	# Check if the limb counter is equal to 6
-	# If so, end game
-	# beq limbCounter, 6, exit # Exit is temporary, later write a game over screen or something
+	beq limbCounter 3, drawFace
+	beq limbCounter 4, drawRightArm
+	beq limbCounter 5, drawLeftArm
+	beq limbCounter 6, drawLeftLeg
+	beq limbCounter 7, drawRightLeg		# at 7 limbs, game is over
 		
-	 # Reprompt
+	 # Reprompt (fail-safe)
 	j getCharGuess
 
 # Get Player 2's word guess
@@ -288,6 +285,16 @@ drawBody:
 	drawVertLine(150, 140, 180, green)
 	# Reprompt
 	j getCharGuess
+drawFace:
+	# Draw eyes
+	drawVertLine(147, 125, 130, green)	# left eye
+	drawVertLine(153, 125, 130, green)	# right eye
+	# Draw frown
+	drawHorizLine(147, 133, 154, green)
+	drawVertLine(147, 133, 136, green)
+	drawVertLine(153, 133, 136, green)
+	# Reprompt
+	j getCharGuess
 drawLeftArm:
 	drawDiagFrontLine(130, 159, 150, green)	# draw left arm
 	#drawDiagFrontLine(130, 160, 150, green)	# make left arm thicker
@@ -308,7 +315,7 @@ drawRightLeg:
 	#drawDiagBackLine(151, 180, 200, green)	# make right leg thicker
 	# last limb drawn, so end the game
 	j exit
-	
+
 # End of program
 exit:
 	li $v0, 10
