@@ -28,6 +28,7 @@ enterWordGuess: .asciiz "\nPlayer 2, enter your word guess: "
 youWinMsg: .asciiz "\n You win!"
 wordBuffer: .space 200 #buffer to hold Player 1's word
 wordGuessBuffer: .space 200 #buffer to hold Player 2's word guess
+wordGuessingBuffer: .space 200 # Buffer to hold Player 2's guessing progress
 correctGuess: .asciiz "\nCorrect guess" #used for branch testing - DELETE LATER
 incorrectGuessMsg: .asciiz "\nIncorrect guess" #used for branch testing - DELETE LATER
 newline: .asciiz "\n"
@@ -69,7 +70,7 @@ printUnderscores:
 # And replace each letter with underscores
 fillWordGuessBuffer:
 	# Get the address of the buffer
-	la $s1, wordGuessBuffer
+	la $s1, wordGuessingBuffer
 	# Get the byte of underscore
 	lb $s2, underscore
 	# Copy address of wordBufferAdd
@@ -93,7 +94,7 @@ fillWordGuessBuffer:
 	
 	return:
 	# Print the wordGuessBuffer
-	la $s1, wordGuessBuffer
+	la $s1, wordGuessingBuffer
 	printSpacedString($s1)
 
 #print 1 underscore per 1 char in Player 1's word
@@ -141,7 +142,7 @@ getCharGuess:
 correctCharGuess:
 	printLabel(newline)
 	la wordBufferAdd, wordBuffer # Store wordBuffer address in wordBufferAdd
-	la $s1, wordGuessBuffer # Save the address of wordGuessBuffer
+	la $s1, wordGuessingBuffer # Save the address of wordGuessingBuffer
 	
 	wordLoop3:
 		lb currByte, 0(wordBufferAdd) #load the current byte at wordBufferAdd into currByte
@@ -172,7 +173,7 @@ correctCharGuess:
 	
 	reprompt:
 		# Print the resulting string
-		la $s1, wordGuessBuffer
+		la $s1, wordGuessingBuffer
 		printSpacedString($s1)
 	
 		# Save the underscore
@@ -206,7 +207,7 @@ incorrectGuess:
 	# Else, add to limbCounter and reprompt for new guess
 	# Print current guessing string
 	printLiteral("\n")
-	la $s1, wordGuessBuffer
+	la $s1, wordGuessingBuffer
 	printSpacedString($s1)
 	
 	###################################################
