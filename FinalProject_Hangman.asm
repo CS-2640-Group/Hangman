@@ -245,20 +245,10 @@ getWordGuess:
 		lb currChar, 0(wordGuessBufferAdd) #get the current character of Player 2's guess
 		addi wordGuessBufferAdd, wordGuessBufferAdd, 1
 		
-		
-		beq currByte, currChar, correctChar #if the current character of Player 1's word and Player 2's guess match up, branch to correctChar
-		beqz currByte, checkIfCorrectWord #branch to checkIfCorrectWord if we hit the null terminator 
-		j incorrectGuess
-		
-	#increment correctChar Count and repeat wordLoop4 if the current char in Player 1's word and the current char from Player 2's guess are the same
-	correctChar:
-		addi correctCharCounter, correctCharCounter, 1 #increment correct character count
-		j wordLoop4
-	checkIfCorrectWord:
-		beq correctCharCounter, wordCounter, youWin #if Player 2 guessed the same number of correct characters as the number of characters in the word, they win!
-		j incorrectGuess
-	
-
+		# beqz currByte, youWin # jump to win if check makes it all the way to new line without finding discrepency <- I DONT THINK WE ACTUALLY NEED TO CHECK LIKE THIS EVER
+		beq currByte, 10, youWin # jump to win if check makes it all the way to new line without finding discrepency
+		bne currByte, currChar, incorrectGuess # if at any point BEFORE the new line character or null terminator the chars dont match then we jump to incorrect guess
+		j wordLoop4 # loop
 
 
 # To use the Bitmap Display Tool:
