@@ -42,6 +42,7 @@ main:
 	.eqv limbCounter $t6 #count limbs on Hangman to determine if Player 2 has lost or can continue to guess 
 	.eqv currWord $t7 #Player 2's current 1-word guess
 	.eqv correctCharCounter $t8 #counts the number of correct characters in Player 2's word guess
+	.eqv wordGuessBufferAdd $t9
 	.eqv one $s0 #will store the ASCII value of one
 	
 	printLabel(enterWord) #ask Player 1 to enter a word
@@ -180,7 +181,7 @@ correctCharGuess:
 		# Check if the word has been guessed
 		stringContains($s1, $s2, $s3)
 	
-		beq $s3, 0, exit # Exit if the word has no underscores
+		beq $s3, 0, youWin #Player 2 won if the word has no underscores
 	
 		# Else do nothing and continue
 	
@@ -220,7 +221,7 @@ incorrectGuess:
 	beq limbCounter 6, drawLeftLeg
 	beq limbCounter 7, drawRightLeg		# at 7 limbs, game is over
 		
-	 # Reprompt (fail-safe)
+	# Reprompt (fail-safe)
 	j getCharGuess
 
 # Get Player 2's word guess
@@ -232,14 +233,20 @@ getWordGuess:
 	printLabel(enterWordGuess) #prompt Player 2 for their word guess
 	readString(wordGuessBuffer, 201) #get Player 2's word guess of maximum 200 chars and save it to wordGuessBuffer
 	
-	#toUpperCase(wordGuessBuffer)
-	
 	la wordBufferAdd, wordBuffer #store wordBuffer address in wordBufferAdd
+	la wordGuessBufferAdd, wordGuessBuffer
+	
+	toUpperCase(wordGuessBufferAdd)
 	
 	wordLoop4:
-		lb currByte, 0(wordBufferAdd)
+		lb currByte, 0(wordBufferAdd) #get the current character of Player 1's word
+		addi wordBufferAdd, wordBufferAdd, 1
 		
-		beq currByte, currChar, correctChar
+		lb currChar, 0(wordGuessBufferAdd) #get the current character of Player 2's guess
+		addi wordGuessBufferAdd, wordGuessBufferAdd, 1
+		
+		
+		beq currByte, currChar, correctChar #if the current character of Player 1's word and Player 2's guess match up, branch to correctChar
 		beqz currByte, checkIfCorrectWord #branch to checkIfCorrectWord if we hit the null terminator 
 		j incorrectGuess
 		
@@ -251,13 +258,7 @@ getWordGuess:
 		beq correctCharCounter, wordCounter, youWin #if Player 2 guessed the same number of correct characters as the number of characters in the word, they win!
 		j incorrectGuess
 	
-#Player 2 Won!
-#For when Player 2 guessed each invidual character correctly before exceeding the max limb counter
-#OR
-#Player 2 guessed the full word correctly before exceeding the max limb counter 
-youWin:
-	printLabel(youWinMsg)
-	j exit
+
 
 
 # To use the Bitmap Display Tool:
@@ -323,6 +324,14 @@ drawRightLeg:
 	# last limb drawn, so end the game
 	j exit
 
+#Player 2 Won!
+#For when Player 2 guessed each invidual character correctly before exceeding the max limb counter
+#OR
+#Player 2 guessed the full word correctly before exceeding the max limb counter 
+youWin:
+	printLabel(youWinMsg)
+	j exit
+	
 # End of program
 exit:
 	li $v0, 10
