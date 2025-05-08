@@ -15,7 +15,9 @@
 # Bitmap Colors
 .eqv green, 0x0000FF00		# green color
 .eqv red, 0x00FF0000       	# red color
+.eqv orange 0x00FFA500	# orange color
 .eqv white, 0xFFFFFFFF    	 # white color
+.eqv black, 0x00000000		# black color
 
 .data
 # strings in MARS are just an array of characters
@@ -25,7 +27,9 @@ underscore: .asciiz "_ "
 enterWord: .asciiz "Player 1, please enter a word for Player 2 to guess: "
 enterCharGuess: .asciiz "\nPlayer 2, enter your next character guess or type 1 to guess a word: "
 enterWordGuess: .asciiz "\nPlayer 2, enter your word guess: "
-youWinMsg: .asciiz "\n You win!"
+youWinMsg: .asciiz "\nYou win!"
+youLoseMsg:	.asciiz "\nYou lost..."
+exitMsg:	.asciiz	"\n\nThank you for playing!"
 wordBuffer: .space 200 #buffer to hold Player 1's word
 wordGuessBuffer: .space 200 #buffer to hold Player 2's word guess
 wordGuessingBuffer: .space 200 # Buffer to hold Player 2's guessing progress
@@ -253,8 +257,9 @@ getWordGuess:
 
 
 # To use the Bitmap Display Tool:
-# Go to Tools > Bitmap Display
-# Set width and height to 256, base address should be 0x10010000 (static data)
+# Go to Tools > Bitmap Display > Connect to MIPS and then run the program
+# Set display width and height to 512, unit width and height to 2
+# Base address should be 0x10010000 (static data)
 # Select 'Connect to MIPS' then run the main file. Now the drawing should appear
 launchDrawing:	# initial drawing when game is launched
 	drawHorizLine(100, 90, 150, white)	# draw top short line of gallow
@@ -268,62 +273,140 @@ launchDrawing:	# initial drawing when game is launched
 	jr $ra
 
 # Drawing parts of body
-# Commented out lines are to make the drawing thicker if needed
 drawHead:
-	drawHorizLine(145, 140, 155, green)	# bottom of head
-	drawHorizLine(145, 120, 155, green)	# top of head
-	drawVertLine(140, 125, 135, green)	# left of head
-	drawVertLine(160, 125, 135, green)	# right of head
-	drawDiagBackLine(155, 120, 125, green)	# diagonal lines to connect head lines
-	drawDiagBackLine(140, 135, 140, green)
-	drawDiagFrontLine(140, 125, 145, green)
-	drawDiagFrontLine(155, 140, 161, green)
+	drawHorizLine(145, 140, 155, orange)	# bottom of head
+	drawHorizLine(145, 120, 155, orange)	# top of head
+	drawVertLine(140, 125, 135, orange)	# left of head
+	drawVertLine(160, 125, 135, orange)	# right of head
+	drawDiagBackLine(155, 120, 125, orange)	# diagonal lines to connect head lines
+	drawDiagBackLine(140, 135, 140, orange)
+	drawDiagFrontLine(140, 125, 145, orange)
+	drawDiagFrontLine(155, 140, 161, orange)
 	# Reprompt
 	j getCharGuess
 drawBody:
-	drawVertLine(150, 140, 180, green)
+	drawVertLine(150, 140, 180, orange)
 	# Reprompt
 	j getCharGuess
 drawFace:
 	# Draw eyes
-	drawVertLine(147, 125, 130, green)	# left eye
-	drawVertLine(153, 125, 130, green)	# right eye
+	drawVertLine(147, 125, 130, orange)	# left eye
+	drawVertLine(153, 125, 130, orange)	# right eye
 	# Draw frown
-	drawHorizLine(147, 133, 154, green)
-	drawVertLine(147, 133, 136, green)
-	drawVertLine(153, 133, 136, green)
+	drawHorizLine(147, 133, 154, orange)
+	drawVertLine(147, 133, 136, orange)
+	drawVertLine(153, 133, 136, orange)
 	# Reprompt
 	j getCharGuess
 drawLeftArm:
-	drawDiagFrontLine(130, 159, 150, green)	# draw left arm
-	#drawDiagFrontLine(130, 160, 150, green)	# make left arm thicker
+	drawDiagFrontLine(130, 159, 150, orange)	# draw left arm
 	# Reprompt
 	j getCharGuess
 drawRightArm:
-	drawDiagBackLine(150, 140, 160, green)	# draw right arm
-	#drawDiagBackLine(151, 140, 160, green)	# make right arm thicker
+	drawDiagBackLine(150, 140, 160, orange)	# draw right arm
 	# Reprompt
 	j getCharGuess
 drawLeftLeg:
-	drawDiagFrontLine(130, 199, 150, green)	# draw left leg
-	#drawDiagFrontLine(130, 200, 150, green)	# make left leg thicker
+	drawDiagFrontLine(130, 199, 150, orange)	# draw left leg
 	# Reprompt
 	j getCharGuess
 drawRightLeg:
-	drawDiagBackLine(150, 180, 200, green)	# draw right leg
-	#drawDiagBackLine(151, 180, 200, green)	# make right leg thicker
+	drawDiagBackLine(150, 180, 200, orange)	# draw right leg
 	# last limb drawn, so end the game
-	j exit
+	j youLose
 
 #Player 2 Won!
 #For when Player 2 guessed each invidual character correctly before exceeding the max limb counter
 #OR
 #Player 2 guessed the full word correctly before exceeding the max limb counter 
 youWin:
+	jal drawWin
 	printLabel(youWinMsg)
+	j exit
+	
+youLose:
+	jal drawLose
+	printLabel(youLoseMsg)
 	j exit
 	
 # End of program
 exit:
+	printLabel(exitMsg)
 	li $v0, 10
 	syscall
+	
+# Draw win and lose screens
+drawWin:	# draws the text "WIN!"
+#W
+	drawVertLine(60, 10, 50, green)
+	drawVertLine(90, 10, 50, green)
+	drawVertLine(75, 30, 50, green)
+	drawHorizLine(60, 50, 91, green)
+#I
+	drawVertLine(115, 10, 50, green)
+	drawHorizLine(100, 10, 130, green)
+	drawHorizLine(100, 50, 130, green)
+#N
+	drawVertLine(140, 10, 50, green)
+	drawHorizLine(140, 20, 150, green)
+	drawVertLine(150, 20, 40, green)
+	drawHorizLine(150, 40, 160, green)
+	drawVertLine(160, 10, 50, green)	
+#!
+	drawVertLine(170, 10, 30, green)
+	drawVertLine(170, 40, 50, green)
+	drawVertLine(175, 10, 30, green)
+	drawVertLine(175, 40, 50, green)
+	
+	drawHorizLine(170, 10, 176, green)
+	drawHorizLine(170, 30, 176, green)
+	drawHorizLine(170, 40, 176, green)
+	drawHorizLine(170, 50, 176, green)
+
+	bge limbCounter, 3 drawSmile
+	jr $ra
+	drawSmile:
+		# Turn that frown upside down if head exists
+		drawHorizLine(147, 133, 154, black)
+		drawHorizLine(147, 136, 154, orange)
+		jr $ra
+	
+drawLose:	# draws the text "HANGMAN"
+#H
+	drawVertLine(30, 10, 50, red)
+	drawVertLine(50, 10, 50, red)
+	drawHorizLine(30, 30, 50, red)
+#A
+	drawVertLine(60, 10, 50, red)
+	drawVertLine(80, 10, 50, red)
+	drawHorizLine(60, 30, 80, red)
+	drawHorizLine(60, 10, 80, red)
+#N
+	drawVertLine(90, 10, 50, red)
+	drawHorizLine(90, 20, 100, red)
+	drawVertLine(100, 20, 40, red)
+	drawHorizLine(100, 40, 110, red)
+	drawVertLine(110, 10, 50, red)
+#G
+	drawVertLine(120, 10, 50, red)
+	drawHorizLine(120, 10, 140, red)
+	drawHorizLine(120, 49, 140, red)
+	drawVertLine(140, 30, 49, red)
+	drawHorizLine(130, 30, 140, red)
+#M
+	drawVertLine(150, 10, 50, red)
+	drawHorizLine(150, 10, 170, red)
+	drawVertLine(160, 10, 30, red)
+	drawVertLine(170, 10, 50, red)
+#A
+	drawVertLine(180, 10, 50, red)
+	drawVertLine(200, 10, 50, red)
+	drawHorizLine(180, 30, 200, red)
+	drawHorizLine(180, 10, 200, red)	
+#N
+	drawVertLine(210, 10, 50, red)
+	drawHorizLine(210, 20, 220, red)
+	drawVertLine(220, 20, 40, red)
+	drawHorizLine(220, 40, 230, red)
+	drawVertLine(230, 10, 50, red)
+	jr $ra
