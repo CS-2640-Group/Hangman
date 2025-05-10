@@ -1,11 +1,11 @@
 # Macros for bitmap drawings
 
 # eqv definitions to make variables more readable
-.eqv width, 256			# display width = 256 pixels
+.eqv width, 256			# minimum display width = 256 pixels
 .eqv pixelSize, 4			# each pixel is 4 bytes
 
 .data
-frameBuffer:	.space	0x100000		# 256 pixels  x 256 pixels = 65536 pixels
+frameBuffer:	.space	0x100000	
 
 # To modify horiz. lines in drawHoriz(x, y, length, color):
 	# move left by decreasing x, move right by increasing

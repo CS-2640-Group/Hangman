@@ -52,8 +52,14 @@ main:
 	
 	printLabel(enterWord) #ask Player 1 to enter a word
 	readString(wordBuffer, 201) #get Player 1's word
+	#print a few newlines to "hide" Player 1's word	
+	printLabel(newline)
+	printLabel(newline)
+	printLabel(newline)
+	printLabel(newline)
+	printLabel(newline)
 	
-	jal launchDrawing
+	jal launchDrawing	#draw the gallows
 	
 	la wordBufferAdd, wordBuffer #store wordBuffer address in wordBufferAdd
 	
@@ -258,7 +264,7 @@ getWordGuess:
 
 # To use the Bitmap Display Tool:
 # Go to Tools > Bitmap Display > Connect to MIPS and then run the program
-# Set display width and height to 512, unit width and height to 2
+# Set BOTH display width and height to 256 OR 512, BOTH unit width and height to 1 OR 2 respectively
 # Base address should be 0x10010000 (static data)
 # Select 'Connect to MIPS' then run the main file. Now the drawing should appear
 launchDrawing:	# initial drawing when game is launched

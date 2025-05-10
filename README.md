@@ -14,9 +14,14 @@ This project is a recreation of the classic paper and pencil Hangman game into a
 
 * Open all the files in your application of choice
 * Open the Bitmap Display Tool and set the following options:
+   - Base Address: 0x10010000 (static data)
+   - *For a small screen:* 
+   - Both Unit Width and Height in Pixels: 1
+   - Both Display Width and Height: 256
+   - *For a big screen:*
    - Both Unit Width and Height in Pixels: 2
    - Both Display Width and Height: 512
-   - Base Address: 0x10010000 (static data)
+
 * Select `Connect to MIPS ` and then run the program file: `FinalProject_Hangman.asm`
 * The text part of the game will be played in the output window and the Bitmap Display will have the drawing after player 1 inputs their word
 
