@@ -249,6 +249,12 @@ getWordGuess:
 	
 	toUpperCase(wordGuessBufferAdd)
 	
+	# Check the lengths of the strings
+	stringGetLength(wordBufferAdd, $s1)
+	stringGetLength(wordGuessBufferAdd, $s2)
+	
+	bne $s1, $s2, incorrectGuess # If the lengths don't match, branch to incorrectGuess
+	
 	wordLoop4:
 		lb currByte, 0(wordBufferAdd) #get the current character of Player 1's word
 		addi wordBufferAdd, wordBufferAdd, 1
