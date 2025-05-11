@@ -1,6 +1,6 @@
 # Hangman
 
-This project is a recreation of the classic paper and pencil Hangman game into a MIPS assembly program. It involves two players: player 1 will enter the word to be guessed, and player 2 enters a character for each guess or can choose to guess the word. Player 2 gets 7 incorrect guesses before they lose the game. Each incorrect guess adds to the Hangman stick figure drawing using the Bitmap Display Tool in MARS.
+This project is a recreation of the classic paper and pencil Hangman game into a MIPS assembly program. It involves two players: Player 1 will enter the word to be guessed, and Player 2 enters a character for each guess or can choose to guess the word. Player 2 gets 7 incorrect guesses before they lose the game. Each incorrect guess adds to the Hangman stick figure drawing using the Bitmap Display Tool in MARS.
 
 # Getting Started
 
