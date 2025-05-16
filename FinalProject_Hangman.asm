@@ -10,7 +10,7 @@
 # 4/18/2025
 # CS 2610.02
 .include "Bitmap_Macros.asm"
-.include "Strings.asm"
+.include "Strings_Macros.asm"
 
 # Bitmap Colors
 .eqv green, 0x0000FF00		# green color
@@ -33,11 +33,14 @@ exitMsg:	.asciiz	"\n\nThank you for playing!"
 wordBuffer: .space 200 #buffer to hold Player 1's word
 wordGuessBuffer: .space 200 #buffer to hold Player 2's word guess
 wordGuessingBuffer: .space 200 # Buffer to hold Player 2's guessing progress
-correctGuess: .asciiz "\nCorrect guess" #used for branch testing - DELETE LATER
-incorrectGuessMsg: .asciiz "\nIncorrect guess" #used for branch testing - DELETE LATER
+correctGuess: .asciiz "\nCorrect guess"
+incorrectGuessMsg: .asciiz "\nIncorrect guess"
 newline: .asciiz "\n"
 
 .text
+#Set .eqv for the registers
+#Get Player 1's word
+#Launch drawing
 main:
 	.eqv loopCounter $t1
 	.eqv wordCounter $t2 #number of characters in Player 1's word
@@ -58,12 +61,13 @@ main:
 	printLabel(newline)
 	printLabel(newline)
 	printLabel(newline)
+	printLabel(newline)
+	printLabel(newline)
 	
 	jal launchDrawing	#draw the gallows
 	
 	la wordBufferAdd, wordBuffer #store wordBuffer address in wordBufferAdd
 	
-	#CODE LATER if there's extra time: convert Player 1's word plus Player 2's char and word guesses to uppercase so that word casing doesn't matter
 	toUpperCase(wordBufferAdd)
 	
 	move wordCounter, $zero #set wordCounter to 0
@@ -76,7 +80,7 @@ main:
 printUnderscores:
 	subi wordCounter, wordCounter, 1 #subtract 1 from wordCounter because it's counted one too many times
 
-# Copy word count to wordGuessBuffer
+# Copy Player 1's word count to wordGuessBuffer
 # And replace each letter with underscores
 fillWordGuessBuffer:
 	# Get the address of the buffer
@@ -127,9 +131,6 @@ getCharGuess:
 	li one, 49 #load ASCII code for '1' into one
 	beq currChar, one, getWordGuess #if the currChar is 1, jump to getWordGuess
 	
-	#CODE SOON: conditions to exit getCharGuess:
-	#	- hangman has been fully drawn (use limb counter from wrongCharGuess to keep track)
-	#	- every invidual character of Player 1's word has been guessed
 	
 	la wordBufferAdd, wordBuffer #store wordBuffer address in wordBufferAdd
 	
@@ -204,7 +205,6 @@ correctCharGuess:
 #	- Add one limb to hangman 
 #	- Increment limb counter
 incorrectGuess:
-	#code below is being used for branch testing - DELETE LATER
 	printLabel(incorrectGuessMsg)
 	
 	# Add to Limb Counter
@@ -262,7 +262,7 @@ getWordGuess:
 		lb currChar, 0(wordGuessBufferAdd) #get the current character of Player 2's guess
 		addi wordGuessBufferAdd, wordGuessBufferAdd, 1
 		
-		# beqz currByte, youWin # jump to win if check makes it all the way to new line without finding discrepency <- I DONT THINK WE ACTUALLY NEED TO CHECK LIKE THIS EVER
+		# beqz currByte, youWin # jump to win if check makes it all the way to new line without finding discrepency
 		beq currByte, 10, youWin # jump to win if check makes it all the way to new line without finding discrepency
 		bne currByte, currChar, incorrectGuess # if at any point BEFORE the new line character or null terminator the chars dont match then we jump to incorrect guess
 		j wordLoop4 # loop
