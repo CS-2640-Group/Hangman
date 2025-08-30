@@ -28,7 +28,7 @@ This project is a recreation of the classic paper and pencil Hangman game into a
 # Authors
 
 * Athena Ballensky
-  - GitHub: [AthenaBallensky](https://github.com/AthenaBallensky)
+  - GitHub: [ClarenceBallensky](https://github.com/ClarenceBallensky)
 * Scott Baroni  
   - GitHub: [ArcaneWorm](https://github.com/ArcaneWorm)
 * Adam Mitchell
